@@ -32,7 +32,7 @@ FYP/
 
 ## Environment
 
-- **OS:** Linux Mint Cinnamon
+- **OS:** Linux
 - **Simulator:** ns-3 (latest dev)
 - **Visualization:** NetAnim
 - **RL Framework:** Python + gymnasium + stable-baselines3 (planned)
