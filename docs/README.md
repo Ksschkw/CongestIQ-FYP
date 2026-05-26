@@ -1,7 +1,5 @@
 ## First Documentation File
 
-
-
 FYP/
 ├── docs/                          # All project documentation
 │   ├── README.md                  # This file
@@ -23,7 +21,7 @@ FYP/
 
 | ID | Milestone                       | Status      | Completion Date |
 | -- | ------------------------------- | ----------- | --------------- |
-| M1 | Network Sandbox                 | Started     | —              |
+| M1 | Network Sandbox                 | Started     | 26th May 2026   |
 | M2 | Congestion Dynamics             | Not started | —              |
 | M3 | Single-Agent RL Environment     | Not started | —              |
 | M4 | MARL Training and Convergence   | Not started | —              |
