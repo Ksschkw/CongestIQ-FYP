@@ -2,7 +2,7 @@
 
 ```
 FYP/
-├── docs/                          # All project documentation
+├── docu/                          # All project documentation
 │   ├── README.md                  # This file
 │   ├── m1-network-sandbox/        # Milestone 1
 │   ├── m2-congestion-dynamics/    # Milestone 2

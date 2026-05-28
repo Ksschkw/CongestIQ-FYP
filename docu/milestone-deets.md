@@ -10,7 +10,7 @@ This is my definitive project scope. Every sub-milestone and micro-milestone fro
 
 | ID   | Sub-Milestone                     | Micro-Milestones                                                                                                       |
 | ---- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| M1.1 | Documentation scaffold            | Create docs folder structure; write M1 README; initialize git tracking                                                 |
+| M1.1 | Documentation scaffold            | Create docu folder structure; write M1 README; initialize git tracking                                                 |
 | M1.2 | Minimal two-node topology         | Write single-link ns-3 script; compile; run; confirm no errors; log output                                             |
 | M1.3 | Dumbbell topology with bottleneck | Two senders, two receivers; 10Mbps/20ms bottleneck; DropTail queue; Reno + CUBIC flows; verify completion              |
 | M1.4 | FlowMonitor integration           | Attach FlowMonitor; enable all probes; serialize XML; confirm file exists and is non-empty                             |
