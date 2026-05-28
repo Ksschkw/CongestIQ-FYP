@@ -1,5 +1,6 @@
 ## First Documentation File
 
+```
 FYP/
 ├── docs/                          # All project documentation
 │   ├── README.md                  # This file
@@ -16,6 +17,7 @@ FYP/
 ├── rl-agent/                      # Python RL code (future)
 ├── .gitignore
 └── README.md                      # Project-level README
+```
 
 ## Milestone Map
 

@@ -1,8 +1,6 @@
-#!/bin/bash
-# setup_docs.sh
 # Creates the documentation scaffold for the MARL TCP Congestion Control FYP
 # Run: chmod +x setup_docs.sh && ./setup_docs.sh
-
+#I run this in the root btw
 set -e  # Exit on any error
 
 PROJECT_ROOT="$HOME/Projects/fyp"
