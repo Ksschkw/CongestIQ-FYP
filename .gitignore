@@ -44,3 +44,5 @@ Thumbs.db
 # Large data files (keep small samples only)
 *.pcap
 *.pcapng
+
+!ns-3-dev/scratch
