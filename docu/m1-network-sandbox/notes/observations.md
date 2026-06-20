@@ -2,7 +2,8 @@
 
 **Date:** 26 May 2026
 **Author:** Okafor Kosisochukwu Johnpaul
-**Environment:** ns-3 on Linux Mint Cinnamon, Python 3.12, venv
+**Environment:** ns-3 on Linux, Python 3.12, venv
+**YT:** https://youtu.be/mEq3XPbP3ms?si=lYSnVfiTKiQXE1Yf
 
 ---
 
