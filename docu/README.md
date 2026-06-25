@@ -23,9 +23,9 @@ FYP/
 
 | ID | Milestone                       | Status      | Completion Date |
 | -- | ------------------------------- | ----------- | --------------- |
-| M1 | Network Sandbox                 | Started     | 26th May 2026   |
-| M2 | Congestion Dynamics             | Not started | —              |
-| M3 | Single-Agent RL Environment     | Not started | —              |
+| M1 | Network Sandbox                 | Finished    | 26th May 2026   |
+| M2 | Congestion Dynamics             | Finished    | 20 June 2026   |
+| M3 | Single-Agent RL Environment     | Started     | —              |
 | M4 | MARL Training and Convergence   | Not started | —              |
 | M5 | Full Evaluation                 | Not started | —              |
 | M6 | Final Documentation and Defense | Not started | —              |
