@@ -1,0 +1,57 @@
+include(FindPkgConfig)
+if(NOT PKG_CONFIG_FOUND)
+    message(STATUS "pkgconf not found")
+    return()
+endif()
+
+pkg_check_modules(ZMQ libzmq)
+if(NOT ZMQ_FOUND)
+    message(STATUS "zeromq not found")
+    return()
+endif()
+
+find_package(Protobuf REQUIRED)
+if(NOT Protobuf_FOUND)
+    message(STATUS "protobuf not found")
+  return()
+endif()
+
+set(proto_source_files
+    model/messages.proto
+)
+
+# Manually add the generated protobuf source file
+set(generated_proto_sources
+    model/messages.pb.cc
+)
+
+set(source_files
+    helper/opengym-helper.cc
+    model/container.cc
+    model/opengym_env.cc
+    model/opengym_interface.cc
+    model/spaces.cc
+    ${generated_proto_sources}
+    ${proto_source_files}
+)
+
+set(header_files
+    helper/opengym-helper.h
+    model/container.h
+    model/opengym_env.h
+    model/opengym_interface.h
+    model/spaces.h
+    model/messages.pb.h
+)
+
+build_lib(
+  LIBNAME opengym
+  SOURCE_FILES ${source_files}
+  HEADER_FILES ${header_files}
+  LIBRARIES_TO_LINK
+    ${libcore}
+    ${ZMQ_LIBRARIES}
+    protobuf::libprotobuf
+  TEST_SOURCES
+    test/opengym-test-suite.cc
+)
