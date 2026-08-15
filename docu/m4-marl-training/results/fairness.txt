@@ -1,0 +1,3 @@
+Jain Fairness Index: 0.9992
+MARL Agent 1 throughput: 5112.1 kbps
+MARL Agent 2 throughput: 4824.8 kbps
