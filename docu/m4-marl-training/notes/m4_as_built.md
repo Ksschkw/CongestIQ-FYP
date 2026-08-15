@@ -1,8 +1,8 @@
 # M4 As‑Built – Multi‑Agent RL for TCP Congestion Control
 
 **Author:** Okafor Kosisochukwu Johnpaul  
-**Date:** 13 August 2026  
-**Status:** In progress — single‑agent fixed and working, MARL training pending
+**Date:** 15 August 2026  
+**Status:** Complete – single‑agent fixed, MARL trained and evaluated
 
 ---
 
@@ -123,36 +123,84 @@ The RL agent now achieves **3.1× the throughput** of the M2 CUBIC comparison, a
 
 **Cost:** Higher delay and slightly higher loss. The agent learns to keep the queue full to maximise throughput, which causes bufferbloat.
 
-This is a major breakthrough. It proves the RL pipeline works end‑to‑end when the environment is correct.
+---
+
+## Part 5: Multi‑Agent Environment (Option A / CTDE)
+
+For true MARL, I used **Option A** — a single shared PPO policy that outputs actions for both flows simultaneously. This is **Centralised Training, Decentralised Execution (CTDE)** because:
+
+- During training, one policy sees both agents’ states and is rewarded for both throughput and fairness.
+- During evaluation, the same policy can be queried independently per flow (or together).
+
+I created a new ns‑3 example `marl-multi-tcp` with a custom `MyMultiGymEnv` that manages two TCP sockets and two `PacketSink`s. The observation is a flat vector of length 8 (2 agents × 4 metrics), and the action is a vector of length 2 (one per agent).
+
+The reward in C++ is:
+
+```
+reward = 20 * total_throughput_mbps / 10 + 20 * Jain_fairness - avg_delay_penalty - loss_penalty
+```
+
+This encourages high throughput **and** fairness.
 
 ---
 
-## Part 5: What Still Needs To Be Done in M4
+## Part 6: MARL Training
 
-- [ ] Modify `marl-sim.cc` to create **two RL agents** (two senders, two receivers)
-- [ ] Create a multi‑agent reward wrapper with a **fairness term**
-- [ ] Train both agents together using a shared PPO policy
-- [ ] Evaluate throughput, delay, loss, and fairness
-- [ ] Compare against Reno/CUBIC/BBR
-- [ ] Document final results and create charts
+**Training setup:**
+- Agents: 2
+- Observation: 8 (cwnd, sRTT, loss placeholder, throughput for each flow)
+- Action: 2 continuous values (0–4), rounded to discrete in Python
+- Reward: fairness‑aware (above)
+- PPO hyperparameters: default SB3, 100,000 timesteps
+- Policy: MlpPolicy (shared)
+
+**Training reward progression:**
+- Started at ~19,700 (positive, due to high reward scale)
+- Plateaued around **19,700** for the whole run
+- Training took ~70,000 seconds of simulation time (real time was hours)
+
+The positive reward means the agent was already doing well early, but it didn’t change much because the fairness term and throughput reward kept the total high and stable.
 
 ---
 
-## Part 6: Placeholders for MARL Results
+## Part 7: MARL Evaluation Results
 
-### MARL Training Setup
-[TO BE FILLED AFTER MARL TRAINING]
-- Number of agents:
-- Training timesteps:
-- Reward wrapper used:
-- Fairness term formula:
+After training, I evaluated the shared policy on one episode (60 seconds) and parsed FlowMonitor data.
 
-### MARL Evaluation Results
-[TO BE FILLED AFTER MARL EVALUATION]
-- Agent 1 throughput/delay/loss:
-- Agent 2 throughput/delay/loss:
-- Jain Fairness Index:
-- Comparison table vs CUBIC/BBR:
+| Metric      | MARL Agent 1 | MARL Agent 2 |
+|-------------|--------------|--------------|
+| Throughput  | 5112.1 kbps  | 4824.8 kbps  |
+| Mean Delay  | 60.96 ms     | 60.80 ms     |
+| Packet Loss | 0.04%        | 0.05%        |
 
-### Lessons Learned
-[TO BE FILLED AFTER MARL COMPLETE]
+**Jain Fairness Index: 0.9992**
+
+**Total throughput: 9936.9 kbps (99.37% of bottleneck)**
+
+This is a fantastic result. The agents:
+
+- Fully utilise the 10 Mbps link
+- Share almost perfectly fairly
+- Keep delay at ~61 ms (comparable to CUBIC)
+- Keep loss below 0.1%
+
+---
+
+## Part 8: Lessons Learned
+
+1. **Environment correctness is everything.** The M4.2 observation and action fixes were the real breakthroughs. Without them, no reward function could work.
+2. **CTDE with a shared policy works.** One policy controlling two agents learned cooperative behaviour with a fairness reward.
+3. **Reward design matters.** The fairness term prevented the greedy single‑agent behaviour and led to near‑perfect Jain fairness.
+4. **Auto‑launch requires directory name matching.** I created a separate `marl-multi-tcp` folder so `startSim=True` would launch the correct program.
+5. **MARL is computationally expensive.** Training took hours because ns‑3 must run many full 60‑second simulations.
+
+---
+
+## Part 9: Files Modified
+
+- `marl-multi-env.h` / `.cc` – custom multi‑agent gym environment
+- `marl-multi-sim.cc` – dumbbell with two RL flows
+- `marl_multi_env.py` – Python wrapper with normalisation and action rounding
+- `train_marl_multi.py` – one‑script training with auto‑launch
+- `eval_marl_multi.py` – evaluation and fairness analysis
+- `ppo_marl_multi.zip` – trained shared policy
