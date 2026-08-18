@@ -33,12 +33,14 @@
 
 **Formula:**
 
-```
-throughput_reward = min(throughput_mbps / 10, 1.0) * 20
-delay_penalty = queueing_delay_ms / 10
-loss_penalty = loss_rate * 20
-reward = throughput_reward - delay_penalty - loss_penalty
-```
+$$
+\begin{aligned}
+\text{throughput\_reward} &= \min\left(\frac{\text{throughput\_mbps}}{10}, 1.0\right) \times 20 \\
+\text{delay\_penalty} &= \frac{\text{queueing\_delay\_ms}}{10} \\
+\text{loss\_penalty} &= \text{loss\_rate} \times 20 \\
+\text{reward} &= \text{throughput\_reward} - \text{delay\_penalty} - \text{loss\_penalty}
+\end{aligned}
+$$
 
 **Training:** 100,000 timesteps, ~49 PPO iterations.
 
@@ -61,9 +63,9 @@ reward = throughput_reward - delay_penalty - loss_penalty
 **Action:** 2 numbers (one per flow), each rounded to discrete 0–4.  
 **Reward (C++):**
 
-```
-reward = 20 * (total_throughput_mbps / 10) + 20 * Jain_fairness - avg_delay_penalty - loss_penalty
-```
+$$
+\text{reward} = 20 \times \left(\frac{\text{total\_throughput\_mbps}}{10}\right) + 20 \times \text{Jain\_fairness} - \text{avg\_delay\_penalty} - \text{loss\_penalty}
+$$
 
 **Why CTDE?**  
 Centralised training with a single policy and shared reward, but evaluation can be done per agent independently. This is the standard MARL paradigm for cooperative tasks.

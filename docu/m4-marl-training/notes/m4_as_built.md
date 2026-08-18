@@ -136,9 +136,9 @@ I created a new ns‑3 example `marl-multi-tcp` with a custom `MyMultiGymEnv` th
 
 The reward in C++ is:
 
-```
-reward = 20 * total_throughput_mbps / 10 + 20 * Jain_fairness - avg_delay_penalty - loss_penalty
-```
+$$
+\text{reward} = 20 \times \frac{\text{total\_throughput\_mbps}}{10} + 20 \times \text{Jain\_fairness} - \text{avg\_delay\_penalty} - \text{loss\_penalty}
+$$
 
 This encourages high throughput **and** fairness.
 

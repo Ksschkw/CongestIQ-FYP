@@ -92,7 +92,9 @@ The three parts:
 Final reward:
 
 
-$$R = \alpha \cdot \text{throughput\_reward} - \beta \cdot \text{delay\_penalty} - \gamma \cdot \text{loss\_penalty}$$
+$$
+R = \alpha \cdot \text{throughput\_reward} - \beta \cdot \text{delay\_penalty} - \gamma \cdot \text{loss\_penalty}
+$$
 
 So if the agent gets perfect throughput (1.0), minimum delay (0 penalty), and zero loss (0 penalty), the maximum reward is 1.0. If everything goes wrong, the reward can go negative (e.g., -0.5 for moderate delay with no throughput).
 
@@ -161,7 +163,9 @@ Exactly the same as v1. The training curve looked great, but the actual behaviou
 
 The Bandwidth‑Delay Product (BDP) is the ideal amount of data that should be in flight to keep the bottleneck busy without building a queue. It’s calculated as:
 
-$$\text{BDP} = \text{Bottleneck Bandwidth} \times \text{Round-Trip Time}$$
+$$
+\text{BDP} = \text{Bottleneck Bandwidth} \times \text{Round-Trip Time}
+$$
 
 For my 10 Mbps (1,250,000 bytes/s) bottleneck and 20 ms (0.02 s) propagation RTT:
 
@@ -178,7 +182,9 @@ I used a Gaussian‑like function:
 * $\text{target\_kb} = 25.0$ (the BDP in kilobytes)
 * $\text{cwnd\_kb} = \frac{\text{cwnd}}{1000.0}$ (current cwnd in kilobytes)
 
-$$\text{cwnd\_reward} = \exp\left( -0.5 \times \left( \frac{\text{cwnd\_kb} - \text{target\_kb}}{0.5 \times \text{target\_kb}} \right)^2 \right)$$
+$$
+\text{cwnd\_reward} = \exp\left( -0.5 \times \left( \frac{\text{cwnd\_kb} - \text{target\_kb}}{0.5 \times \text{target\_kb}} \right)^2 \right)
+$$
 
 This gives a value near 1.0 when cwnd is close to 25 KB, and drops off to near 0 when cwnd is very small or very large.
 
@@ -190,7 +196,9 @@ Then I added penalties:
 The final reward:
 
 
-$$R = \text{cwnd\_reward} - 0.5 \cdot \text{delay\_penalty} - 2.0 \cdot \text{loss\_penalty}$$
+$$
+R = \text{cwnd\_reward} - 0.5 \cdot \text{delay\_penalty} - 2.0 \cdot \text{loss\_penalty}
+$$
 
 I kept the delay and loss penalties simple but scaled them down so the cwnd reward could dominate and push the agent to increase the window.
 
