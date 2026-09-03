@@ -123,3 +123,20 @@ The shared policy learned to divide the bottleneck almost perfectly fairly while
 - `train_marl_multi.py` – one‑script training
 - `eval_marl_multi.py` – evaluation and fairness
 - `ppo_marl_multi.zip` – trained shared policy
+
+
+---
+
+## Critical Limitation: MARL Result Validity
+
+During M5 baseline comparisons, I discovered that the MARL evaluation produced numbers **identical to CUBIC**:
+
+- MARL Agent 1: 5112.1 kbps, 60.96 ms, 0.04% loss
+- MARL Agent 2: 4824.8 kbps, 60.80 ms, 0.05% loss
+- CUBIC baseline: identical
+
+This indicates the trained MARL policy did **not** fully control the congestion window. Despite adding a no‑op congestion class and setting it as default, ns‑3’s TCP stack still applied its own congestion control. The RL actions were therefore overpowered by built‑in TCP logic, making the MARL result invalid.
+
+**The single‑agent RL result (8565 kbps) is still valid** because in that case the RL action code directly set cwnd and the default TCP logic was weak enough not to fully mask the RL control.
+
+**Future work:** Implement a proper setter to force the no‑op congestion algorithm onto each socket after creation, then retrain and reevaluate the MARL policy.
