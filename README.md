@@ -5,7 +5,7 @@
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/Ksschkw/CongestiQ-FYP.)](https://github.com/Ksschkw/CongestiQ-FYP.)
 [![YouTube Playlist](https://img.shields.io/badge/YouTube-Playlist-red)](https://youtube.com/playlist?list=PLhU0J79Smu6kmr6QNJgd0cFa2f-UCwU1K)
-
+[Read ](yada.md)
 ---
 
 ## Table of Contents
