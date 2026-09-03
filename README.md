@@ -1,11 +1,15 @@
+We’ll update the README now to reflect the final state: M4 and M5 complete with honest limitations, plus links to all new files and notes.
+
+---
+
 # CongestiQ – MARL for Adaptive TCP Congestion Control
 
-> **Final‑year project by Kosichukwu Okafor (FUTO, Software Engineering)**  
+> **Final‑year project by Kosisochukwu Okafor (FUTO, Software Engineering)**  
 > Investigating whether Multi‑Agent Reinforcement Learning can learn better congestion control than Reno, CUBIC, and BBR — all inside a simulator.
 
-[![GitHub last commit](https://img.shields.io/github/last-commit/Ksschkw/CongestiQ-FYP.)](https://github.com/Ksschkw/CongestiQ-FYP.)
+[![GitHub last commit](https://img.shields.io/github/last-commit/Ksschkw/CongestiQ-FYP)](https://github.com/Ksschkw/CongestiQ-FYP)
 [![YouTube Playlist](https://img.shields.io/badge/YouTube-Playlist-red)](https://youtube.com/playlist?list=PLhU0J79Smu6kmr6QNJgd0cFa2f-UCwU1K)
-[Read ](yada.md)
+
 ---
 
 ## Table of Contents
@@ -53,8 +57,8 @@ CongestiQ-FYP/
 │   ├── m1-network-sandbox/        ← M1: Reno vs CUBIC
 │   ├── m2-congestion-dynamics/    ← M2: Multi‑flow analysis
 │   ├── m3-single-agent-rl/        ← M3: RL environment and training
-│   ├── m4-marl-training/          ← (future) Multi‑agent RL
-│   ├── m5-evaluation/             ← (future) Full benchmarks
+│   ├── m4-marl-training/          ← M4: MARL environment, training, evaluation
+│   ├── m5-evaluation/             ← M5: Full benchmarks
 │   └── m6-final-documentation/    ← (future) Thesis chapters
 ├── ns-3-dev/                      ← ns‑3 simulator (gitignored)
 ├── netanim/                       ← NetAnim visualiser (gitignored)
@@ -79,8 +83,8 @@ Everything you need to understand, reproduce, or evaluate my work lives inside `
 | M1 | Network Sandbox | ✅ |
 | M2 | Congestion Dynamics | ✅ |
 | M3 | Single‑Agent RL | ✅ |
-| M4 | MARL Training | 🔲 |
-| M5 | Full Evaluation | 🔲 |
+| M4 | MARL Training | ✅ (with limitations) |
+| M5 | Full Evaluation | ✅ |
 | M6 | Documentation & Defense | 🔲 |
 
 Each milestone has a **dedicated walkthrough video** — see the [YouTube Playlist](https://youtube.com/playlist?list=PLhU0J79Smu6kmr6QNJgd0cFa2f-UCwU1K).
@@ -105,8 +109,8 @@ sudo apt update && sudo apt install -y \
 ### 2. Clone and set up Python
 
 ```bash
-git clone https://github.com/Ksschkw/CongestiQ-FYP..git
-cd CongestiQ-FYP.
+git clone https://github.com/Ksschkw/CongestiQ-FYP.git
+cd CongestiQ-FYP
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
@@ -128,7 +132,7 @@ protoc --cpp_out=. messages.proto
 cd ../..
 
 # Patch CMakeLists to include messages.pb.cc and disable broken examples
-# (see [m3_as_built.md](docu/m3-single-agent-rl/notes/m3_as_built.md) for the exact edits)
+# (see m3_as_built.md for the exact edits)
 
 cd ../..
 ./ns3 configure --enable-examples
@@ -151,38 +155,40 @@ cd ns-3-dev
 ./ns3 run scratch/dumbbell-tcp
 ```
 
-Then generate graphs:
+Generate graphs:
 
 ```bash
 cd docu/m1-network-sandbox
 python3 code/plot_flowmon.py results/dumbbell-tcp-flowmon.xml
 ```
 
-### Train your own RL agent (M3)
+### Train a single‑agent RL policy (M4)
 
 ```bash
 cd rl_agent
-python3 train_m3_v3.py
+python3 train_m4_single_v2.py
 ```
-
-The script starts ns‑3 automatically, trains for 50 k steps, and saves the model.
 
 ### Evaluate a trained model
 
 ```bash
-python3 eval_v3.py
+python3 eval_m4_single_v2.py
 ```
 
-Prints throughput, delay, loss and saves a comparison chart.
-
-### Quick bridge test
+### Run multi‑agent MARL training (M4)
 
 ```bash
-cd ns-3-dev/contrib/ns3-gym/examples/rl-tcp
-python3 test.py
+python3 train_marl_multi.py
 ```
 
-Verifies that ns‑3 ↔ Python communication works.
+### Run full evaluation baselines (M5)
+
+```bash
+cd ns-3-dev
+./ns3 run "scratch/two-flow-baseline --tcp=TcpNewReno --duration=60"
+./ns3 run "scratch/two-flow-baseline --tcp=TcpCubic --duration=60"
+./ns3 run "scratch/two-flow-baseline --tcp=TcpBbr --duration=60"
+```
 
 ---
 
@@ -210,6 +216,23 @@ Verifies that ns‑3 ↔ Python communication works.
 - As‑built narrative: [M3 as‑built](docu/m3-single-agent-rl/notes/m3_as_built.md)  
 - Observations: [M3 observations](docu/m3-single-agent-rl/notes/observations.md)
 
+### M4 – Single‑Agent RL Fix and MARL Attempt
+
+- Fixed two critical bugs:
+  - **Observation bug**: throughput now measured from `PacketSink::GetTotalRx()` delta.
+  - **Action bug**: cwnd multiplier applied correctly.
+- Single‑agent RL achieved **8565.3 kbps** throughput, but with high delay (85.67 ms) and loss (0.34%).
+- MARL two‑agent environment built, trained, and evaluated. However, the MARL result matched CUBIC exactly, indicating ns‑3’s built‑in TCP congestion control was still active and overpowering the RL actions. This is documented as a limitation.
+- Full details: [M4 as‑built](docu/m4-marl-training/notes/m4_as_built.md), [M4 experiments](docu/m4-marl-training/notes/m4_experiments.md), [M4 observations](docu/m4-marl-training/notes/m4_observations.md)
+
+### M5 – Full Evaluation
+
+- Ran two‑flow baselines for Reno, CUBIC, BBR on the same topology.
+- Reno is fairest (Jain 1.0000) with lowest delay and loss.
+- BBR has highest total throughput but worst fairness, highest delay and loss.
+- MARL two‑agent result not trustworthy because it mimicked CUBIC (see M4 limitation).
+- Full details: [M5 as‑built](docu/m5-evaluation/notes/m5_as_built.md), [M5 observations](docu/m5-evaluation/notes/m5_observations.md)
+
 ---
 
 ## Documentation
@@ -221,14 +244,14 @@ The `docu/` folder is the project’s memory. Every milestone is self‑containe
 - **Code:** [`dumbbell-tcp.cc`](docu/m1-network-sandbox/code/dumbbell-tcp.cc), [`plot_flowmon.py`](docu/m1-network-sandbox/code/plot_flowmon.py)  
 - **Results:** [`throughput.png`](docu/m1-network-sandbox/results/throughput.png), [`delay.png`](docu/m1-network-sandbox/results/delay.png), [`loss.png`](docu/m1-network-sandbox/results/loss.png)  
 - **Notes:** [`observations.md`](docu/m1-network-sandbox/notes/observations.md), [`video-script.md`](docu/m1-network-sandbox/notes/video-script.md)  
-- **Video:** [M1 Walkthrough](https://youtu.be/mEq3XPbP3ms?si=lYSnVfiTKiQXE1Yf)
+- **Video:** [M1 Walkthrough](https://youtu.be/mEq3XPbP3ms)
 
 ### M2 – Congestion Dynamics
 
 - **Code:** [`multi-flow-bottleneck.cc`](docu/m2-congestion-dynamics/code/multi-flow-bottleneck.cc), [`plot_multi_flow_stats.py`](docu/m2-congestion-dynamics/code/plot_multi_flow_stats.py), [`plot_queue.py`](docu/m2-congestion-dynamics/code/plot_queue.py)  
 - **Results:** [`throughput_m2.png`](docu/m2-congestion-dynamics/results/throughput_m2.png), [`delay_m2.png`](docu/m2-congestion-dynamics/results/delay_m2.png), [`loss_m2.png`](docu/m2-congestion-dynamics/results/loss_m2.png), [`fairness_m2.png`](docu/m2-congestion-dynamics/results/fairness_m2.png), [`queue_occupancy.png`](docu/m2-congestion-dynamics/results/queue_occupancy.png)  
 - **Notes:** [`observations.md`](docu/m2-congestion-dynamics/notes/observations.md)  
-- **Video:** [M2 Walkthrough](https://youtu.be/rWTC8cTxTPI?si=9-jh4C6XG07urqbG)
+- **Video:** [M2 Walkthrough](https://youtu.be/rWTC8cTxTPI)
 
 ### M3 – Single‑Agent RL
 
@@ -240,6 +263,22 @@ The `docu/` folder is the project’s memory. Every milestone is self‑containe
 - **Results:** [`training_rewards_all.png`](docu/m3-single-agent-rl/results/training_rewards_all.png), [`throughput_comparison_all.png`](docu/m3-single-agent-rl/results/throughput_comparison_all.png), [`delay_comparison_all.png`](docu/m3-single-agent-rl/results/delay_comparison_all.png), [`loss_comparison_all.png`](docu/m3-single-agent-rl/results/loss_comparison_all.png)  
 - **Notes:** [`m3_as_built.md`](docu/m3-single-agent-rl/notes/m3_as_built.md), [`m3_experiments.md`](docu/m3-single-agent-rl/notes/m3_experiments.md), [`observations.md`](docu/m3-single-agent-rl/notes/observations.md), [`video-script.md`](docu/m3-single-agent-rl/notes/video-script.md)  
 - **Video:** [M3 Walkthrough](https://youtu.be/)
+
+### M4 – MARL Training
+
+- **C++ multi‑agent environment:** [`marl-multi-sim.cc`](docu/m4-marl-training/code/m4.3-marl-two-agents/marl-multi-sim.cc), [`marl-multi-env.h`](docu/m4-marl-training/code/m4.3-marl-two-agents/marl-multi-env.h), [`marl-multi-env.cc`](docu/m4-marl-training/code/m4.3-marl-two-agents/marl-multi-env.cc)  
+- **Python wrapper:** [`marl_multi_env.py`](docu/m4-marl-training/code/m4.3-marl-two-agents/marl_multi_env.py)  
+- **Training/eval:** [`train_marl_multi.py`](docu/m4-marl-training/code/m4.3-marl-two-agents/train_marl_multi.py), [`eval_marl_multi.py`](docu/m4-marl-training/code/m4.3-marl-two-agents/eval_marl_multi.py)  
+- **Model:** [`ppo_marl_multi.zip`](docu/m4-marl-training/code/m4.3-marl-two-agents/ppo_marl_multi.zip)  
+- **Notes:** [`m4_as_built.md`](docu/m4-marl-training/notes/m4_as_built.md), [`m4_experiments.md`](docu/m4-marl-training/notes/m4_experiments.md), [`m4_observations.md`](docu/m4-marl-training/notes/m4_observations.md)
+
+### M5 – Full Evaluation
+
+- **Baseline script:** [`two-flow-baseline.cc`](docu/m5-evaluation/code/two-flow-baseline.cc)  
+- **Plotting:** [`plot_m5_results.py`](docu/m5-evaluation/code/plot_m5_results.py)  
+- **Results:** [`m5_throughput_comparison.png`](docu/m5-evaluation/results/m5_throughput_comparison.png), [`m5_fairness_comparison.png`](docu/m5-evaluation/results/m5_fairness_comparison.png), [`m5_delay_comparison.png`](docu/m5-evaluation/results/m5_delay_comparison.png), [`m5_loss_comparison.png`](docu/m5-evaluation/results/m5_loss_comparison.png)  
+- **FlowMonitor files:** [`two-flow-TcpNewReno.flowmon`](docu/m5-evaluation/results/two-flow-TcpNewReno.flowmon), [`two-flow-TcpCubic.flowmon`](docu/m5-evaluation/results/two-flow-TcpCubic.flowmon), [`two-flow-TcpBbr.flowmon`](docu/m5-evaluation/results/two-flow-TcpBbr.flowmon)  
+- **Notes:** [`m5_as_built.md`](docu/m5-evaluation/notes/m5_as_built.md), [`m5_observations.md`](docu/m5-evaluation/notes/m5_observations.md)
 
 ---
 
