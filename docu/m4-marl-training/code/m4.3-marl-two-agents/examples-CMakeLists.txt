@@ -1,0 +1,130 @@
+include_directories(${CMAKE_BINARY_DIR}/include)
+# add_subdirectory(congestiq)
+# build_lib_example(
+#   NAME interference-pattern
+#   SOURCE_FILES interference-pattern/mygym.cc
+#                interference-pattern/sim.cc
+#   LIBRARIES_TO_LINK
+#     ${libcore}
+#     ${libinternet}
+#     ${libopengym}
+#     ${libwifi}
+# )
+
+# build_lib_example(
+#   NAME linear-mesh
+#   SOURCE_FILES linear-mesh/sim.cc
+#   LIBRARIES_TO_LINK
+#     ${libapplications}
+#     ${libcore}
+#     ${libinternet}
+#     ${libopengym}
+#     ${libwifi}
+# )
+
+# build_lib_example(
+#   NAME linear-mesh-2
+#   SOURCE_FILES linear-mesh-2/sim.cc
+#                linear-mesh-2/mygym.cc
+#   LIBRARIES_TO_LINK
+#     ${libapplications}
+#     ${libcore}
+#     ${libinternet}
+#     ${libopengym}
+#     ${libwifi}
+# )
+
+# build_lib_example(
+#   NAME opengym
+#   SOURCE_FILES opengym/sim.cc
+#   LIBRARIES_TO_LINK
+#     ${libcore}
+#     ${libopengym}
+# )
+build_lib_example(
+  NAME opengym-example
+  SOURCE_FILES opengym/sim.cc
+  LIBRARIES_TO_LINK
+    ${libcore}
+    ${libopengym}
+)
+
+# build_lib_example(
+#   NAME congestiq
+#   SOURCE_FILES opengym/congestiq-sim.cc opengym/my-gym-env.cc
+#   LIBRARIES_TO_LINK
+#     ${libapplications}
+#     ${libcore}
+#     ${libflow-monitor}
+#     ${libinternet}
+#     ${libopengym}
+#     ${libpoint-to-point}
+# )
+# target_include_directories(congestiq PRIVATE ${CMAKE_BINARY_DIR}/include)
+
+# build_lib_example(
+#   NAME opengym-2
+#   SOURCE_FILES opengym-2/sim.cc
+#                opengym-2/mygym.cc
+#   LIBRARIES_TO_LINK
+#     ${libcore}
+#     ${libopengym}
+# )
+
+build_lib_example(
+  NAME rl-tcp
+  SOURCE_FILES rl-tcp/sim.cc
+               rl-tcp/tcp-rl-env.cc
+               rl-tcp/tcp-rl.cc
+  LIBRARIES_TO_LINK
+    ${libapplications}
+    ${libcore}
+    ${libflow-monitor}
+    ${libinternet}
+    ${libopengym}
+    ${libpoint-to-point-layout}
+    ${libptp}
+    ${libnetanim}
+)
+
+build_lib_example(
+  NAME marl-tcp
+  SOURCE_FILES marl-tcp/marl-sim.cc
+               marl-tcp/marl-rl-env.cc
+               marl-tcp/marl-rl.cc
+  LIBRARIES_TO_LINK
+    ${libapplications}
+    ${libcore}
+    ${libflow-monitor}
+    ${libinternet}
+    ${libopengym}
+    ${libpoint-to-point-layout}
+    ${libptp}
+    ${libnetanim}
+)
+
+
+build_lib_example(
+  NAME marl-multi-tcp
+  SOURCE_FILES marl-multi-tcp/marl-multi-sim.cc
+               marl-multi-tcp/marl-multi-env.cc
+  LIBRARIES_TO_LINK
+    ${libapplications}
+    ${libcore}
+    ${libflow-monitor}
+    ${libinternet}
+    ${libopengym}
+    ${libpoint-to-point}
+)
+
+# build_lib_example(
+#   NAME congestiq
+#   SOURCE_FILES congestiq/congestiq-sim.cc congestiq/my-gym-env.cc
+#   LIBRARIES_TO_LINK
+#     ${libapplications}
+#     ${libcore}
+#     ${libflow-monitor}
+#     ${libinternet}
+#     ns3-dev-opengym-default
+#     ${libpoint-to-point}
+# )

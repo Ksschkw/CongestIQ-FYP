@@ -6,11 +6,52 @@
 #include "ns3/flow-monitor-helper.h"
 #include "ns3/ipv4-global-routing-helper.h"
 #include "ns3/opengym-module.h"
+#include "ns3/tcp-socket-base.h"
 #include "marl-multi-env.h"
 
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("MarlMulti");
+
+// ----------------------------------------------------------------------
+// No‑op TCP congestion control.
+// This disables ns‑3's own cwnd growth/reduction so that only the
+// RL agent (through MyMultiGymEnv::ExecuteActions) controls cwnd.
+// ----------------------------------------------------------------------
+class NoOpTcpCongestion : public TcpCongestionOps
+{
+public:
+  static TypeId GetTypeId (void)
+  {
+    static TypeId tid = TypeId ("ns3::NoOpTcpCongestion")
+      .SetParent<TcpCongestionOps> ()
+      .AddConstructor<NoOpTcpCongestion> ()
+    ;
+    return tid;
+  }
+
+  NoOpTcpCongestion () : TcpCongestionOps () {}
+  NoOpTcpCongestion (const NoOpTcpCongestion &other) : TcpCongestionOps (other) {}
+  ~NoOpTcpCongestion () override {}
+
+  std::string GetName () const override { return "NoOpTcpCongestion"; }
+
+  uint32_t GetSsThresh (Ptr<const TcpSocketState> tcb, uint32_t /*bytesInFlight*/) override
+  {
+    // Keep the current cwnd as ssThresh (no change)
+    return tcb->m_cWnd.Get ();
+  }
+
+  void IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t /*segmentsAcked*/) override
+  {
+    // Do nothing. The RL agent sets cwnd directly.
+  }
+
+  Ptr<TcpCongestionOps> Fork () override
+  {
+    return CopyObject<NoOpTcpCongestion> (this);
+  }
+};
 
 int main (int argc, char *argv[])
 {
@@ -31,11 +72,32 @@ int main (int argc, char *argv[])
   SeedManager::SetSeed (1);
   SeedManager::SetRun (run);
 
+  // ------------------------------------------------------------------
+  // IMPORTANT: Disable ns‑3's own TCP congestion control.
+  // Use our no‑op class so only the RL actions matter.
+  // ------------------------------------------------------------------
+  // Config::SetDefault ("ns3::TcpL4Protocol::SocketType",
+  //                     TypeIdValue (TcpSocketBase::GetTypeId ()));
+  // Config::SetDefault ("ns3::TcpSocketBase::CongestionOps",
+  //                     TypeIdValue (NoOpTcpCongestion::GetTypeId ()));
+
+  // Create nodes
   NodeContainer senders, receivers, routers;
   senders.Create (nAgents);
+
+    // Use our no-op congestion control as the socket type (same as baselines)
+  for (uint32_t i = 0; i < senders.GetN (); ++i)
+    {
+      Config::Set ("/NodeList/" + std::to_string (senders.Get (i)->GetId ()) +
+                   "/$ns3::TcpL4Protocol/SocketType",
+                   TypeIdValue (NoOpTcpCongestion::GetTypeId ()));
+    }
+  
   receivers.Create (nAgents);
   routers.Create (2);
 
+
+  // Links
   PointToPointHelper accessLink;
   accessLink.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
   accessLink.SetChannelAttribute ("Delay", StringValue ("1ms"));
