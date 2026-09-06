@@ -1,4 +1,3 @@
-We’ll update the README now to reflect the final state: M4 and M5 complete with honest limitations, plus links to all new files and notes.
 
 ---
 
