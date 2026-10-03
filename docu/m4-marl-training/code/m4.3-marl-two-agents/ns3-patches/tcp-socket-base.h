@@ -269,6 +269,17 @@ class TcpSocketBase : public TcpSocket
     Ptr<TcpSocketState> GetTcpState (void) const;
 
     /**
+     * @brief Get the congestion control algorithm currently attached to the socket.
+     *
+     * Added for the CongestiQ project so a simulation can verify which
+     * congestion-control algorithm is really driving a socket, instead of
+     * trusting the configuration path.
+     *
+     * @return the attached congestion control ops object
+     */
+    Ptr<TcpCongestionOps> GetCongestionControlAlgorithm (void) const;
+
+    /**
      * @brief Set the associated RTT estimator.
      * @param rtt the RTT estimator
      */

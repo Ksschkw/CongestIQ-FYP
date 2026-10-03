@@ -215,22 +215,23 @@ cd ns-3-dev
 - As‑built narrative: [M3 as‑built](docu/m3-single-agent-rl/notes/m3_as_built.md)  
 - Observations: [M3 observations](docu/m3-single-agent-rl/notes/observations.md)
 
-### M4 – Single‑Agent RL Fix and MARL Attempt
+### M4 - Single-Agent RL Fix and MARL
 
 - Fixed two critical bugs:
   - **Observation bug**: throughput now measured from `PacketSink::GetTotalRx()` delta.
   - **Action bug**: cwnd multiplier applied correctly.
-- Single‑agent RL achieved **8565.3 kbps** throughput, but with high delay (85.67 ms) and loss (0.34%).
-- MARL two‑agent environment built, trained, and evaluated. However, the MARL result matched CUBIC exactly, indicating ns‑3’s built‑in TCP congestion control was still active and overpowering the RL actions. This is documented as a limitation.
-- Full details: [M4 as‑built](docu/m4-marl-training/notes/m4_as_built.md), [M4 experiments](docu/m4-marl-training/notes/m4_experiments.md), [M4 observations](docu/m4-marl-training/notes/m4_observations.md)
+- Single-agent RL achieved **8565.3 kbps** throughput, but with high delay (85.67 ms) and loss (0.34%).
+- MARL two-agent environment built, trained and evaluated. The first evaluation matched CUBIC exactly. During the October correctness review I found the real cause: the no-op congestion control was configured before the `TcpL4Protocol` object existed, so `Config::Set` matched nothing and every socket ran the default TCP CUBIC. The corrected environment attaches the no-op control with `SetFailSafe` after the internet stack installs and aborts on a miss.
+- The corrected multi-agent policy was produced by an imitation warm start followed by PPO. It holds the window near the bandwidth-delay product. On the two-flow dumbbell it achieves **8696.3 kbps**, **22.80 ms** delay, **0.000%** loss and a Jain fairness index of **1.0000**.
+- Full details: [root cause correction](docu/m4-marl-training/notes/m4_root_cause_correction.md), [control verification](docu/m4-marl-training/notes/m4_control_verification.md), [retrain record](docu/m4-marl-training/notes/m4_retrain_v2.md), [how to run](docu/m4-marl-training/notes/m4_v2_how_to_run.md)
 
-### M5 – Full Evaluation
+### M5 - Full Evaluation
 
-- Ran two‑flow baselines for Reno, CUBIC, BBR on the same topology.
-- Reno is fairest (Jain 1.0000) with lowest delay and loss.
-- BBR has highest total throughput but worst fairness, highest delay and loss.
-- MARL two‑agent result not trustworthy because it mimicked CUBIC (see M4 limitation).
-- Full details: [M5 as‑built](docu/m5-evaluation/notes/m5_as_built.md), [M5 observations](docu/m5-evaluation/notes/m5_observations.md)
+- Ran two-flow baselines for Reno, CUBIC and BBR on the same topology.
+- Reno is fairest (Jain 1.0000) with the lowest delay and loss among the baselines.
+- BBR has the highest delay and loss on this topology.
+- The corrected learned policy uses 87 percent of the link with one third of the CUBIC delay, zero measured loss and perfect fairness. It is below CUBIC on raw throughput, and the write-up states this openly.
+- Full details: [corrected evaluation](docu/m5-evaluation/notes/m5_corrected_evaluation.md), [M5 as-built](docu/m5-evaluation/notes/m5_as_built.md), [M5 observations](docu/m5-evaluation/notes/m5_observations.md)
 
 ---
 

@@ -6,16 +6,18 @@
 #include "ns3/flow-monitor-helper.h"
 #include "ns3/ipv4-global-routing-helper.h"
 #include "ns3/opengym-module.h"
+#include "ns3/netanim-module.h"
 #include "ns3/tcp-socket-base.h"
 #include "marl-multi-env.h"
+#include <memory>
 
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("MarlMulti");
 
 // ----------------------------------------------------------------------
-// No‑op TCP congestion control.
-// This disables ns‑3's own cwnd growth/reduction so that only the
+// No-op TCP congestion control.
+// This disables ns-3's own cwnd growth/reduction so that only the
 // RL agent (through MyMultiGymEnv::ExecuteActions) controls cwnd.
 // ----------------------------------------------------------------------
 class NoOpTcpCongestion : public TcpCongestionOps
@@ -60,6 +62,8 @@ int main (int argc, char *argv[])
   double duration = 60.0;
   uint32_t port = 5555;
   uint32_t run = 1;
+  bool flowMon = true;
+  bool anim = false;
 
   CommandLine cmd;
   cmd.AddValue ("nAgents", "Number of RL agents", nAgents);
@@ -67,35 +71,32 @@ int main (int argc, char *argv[])
   cmd.AddValue ("duration", "Simulation duration", duration);
   cmd.AddValue ("openGymPort", "Port", port);
   cmd.AddValue ("simSeed", "Seed", run);
+  cmd.AddValue ("flowmon", "Write FlowMonitor XML (disable during training)", flowMon);
+  cmd.AddValue ("anim", "Write a NetAnim XML trace", anim);
   cmd.Parse (argc, argv);
 
   SeedManager::SetSeed (1);
   SeedManager::SetRun (run);
 
+  FlowMonitorHelper flowmonHelper;
+
   // ------------------------------------------------------------------
-  // IMPORTANT: Disable ns‑3's own TCP congestion control.
-  // Use our no‑op class so only the RL actions matter.
+  // IMPORTANT: the RL policy, not ns-3, must own cwnd.
+  //
+  // In this ns-3 tree the TcpL4Protocol "SocketType" attribute holds the
+  // TypeId of the congestion control ops that every newly created socket
+  // receives.  It must therefore be set to a TcpCongestionOps subclass,
+  // and it must be set *after* InternetStackHelper::Install, because the
+  // TcpL4Protocol object does not exist before that point.  Config::Set
+  // silently does nothing when its path matches no object, which is how
+  // the earlier version of this file fell back to the default TcpCubic.
   // ------------------------------------------------------------------
-  // Config::SetDefault ("ns3::TcpL4Protocol::SocketType",
-  //                     TypeIdValue (TcpSocketBase::GetTypeId ()));
-  // Config::SetDefault ("ns3::TcpSocketBase::CongestionOps",
-  //                     TypeIdValue (NoOpTcpCongestion::GetTypeId ()));
 
   // Create nodes
   NodeContainer senders, receivers, routers;
   senders.Create (nAgents);
-
-    // Use our no-op congestion control as the socket type (same as baselines)
-  for (uint32_t i = 0; i < senders.GetN (); ++i)
-    {
-      Config::Set ("/NodeList/" + std::to_string (senders.Get (i)->GetId ()) +
-                   "/$ns3::TcpL4Protocol/SocketType",
-                   TypeIdValue (NoOpTcpCongestion::GetTypeId ()));
-    }
-  
   receivers.Create (nAgents);
   routers.Create (2);
-
 
   // Links
   PointToPointHelper accessLink;
@@ -121,6 +122,18 @@ int main (int argc, char *argv[])
   stack.Install (senders);
   stack.Install (receivers);
   stack.Install (routers);
+
+  // Now that the TcpL4Protocol exists on every sender node, replace ns-3's
+  // congestion control with the no-op class.  SetFailSafe returns false if
+  // the path matched nothing, so a silent fallback to TcpCubic is impossible.
+  for (uint32_t i = 0; i < senders.GetN (); ++i)
+    {
+      std::string path = "/NodeList/" + std::to_string (senders.Get (i)->GetId ()) +
+                         "/$ns3::TcpL4Protocol/SocketType";
+      bool ok = Config::SetFailSafe (path, TypeIdValue (NoOpTcpCongestion::GetTypeId ()));
+      NS_ABORT_MSG_UNLESS (ok, "Could not attach NoOpTcpCongestion at " << path
+                           << "; the RL policy would not own cwnd.");
+    }
 
   Ipv4AddressHelper addr;
   std::vector<Ipv4InterfaceContainer> senderIfs (nAgents), recvIfs (nAgents);
@@ -184,6 +197,16 @@ int main (int argc, char *argv[])
         tcp->GetAttribute ("SocketList", socketVec);
         Ptr<Object> sockObj = socketVec.Get (socketVec.GetN () - 1);
         Ptr<TcpSocketBase> tcpSocket = DynamicCast<TcpSocketBase> (sockObj);
+        NS_ABORT_MSG_UNLESS (tcpSocket, "Sender " << i << " has no TcpSocketBase");
+
+        // Runtime proof that ns-3's own congestion control is not attached.
+        std::string caName = tcpSocket->GetCongestionControlAlgorithm ()->GetName ();
+        std::cout << "[MarlMulti] sender " << i << " congestion control = " << caName
+                  << std::endl;
+        NS_ABORT_MSG_UNLESS (caName == "NoOpTcpCongestion",
+                             "Sender " << i << " is controlled by " << caName
+                             << ", not by the RL policy.");
+
         sockets.push_back (tcpSocket);
       }
 
@@ -193,13 +216,33 @@ int main (int argc, char *argv[])
     openGymInterface->NotifyCurrentState ();
   });
 
-  FlowMonitorHelper flowmonHelper;
-  flowmonHelper.InstallAll ();
+  if (flowMon)
+    {
+      flowmonHelper.InstallAll ();
+    }
+
+  // Optional NetAnim trace. The object must stay alive until after
+  // Simulator::Run, because the XML is written when it is destroyed.
+  std::unique_ptr<AnimationInterface> animator;
+  if (anim)
+    {
+      animator = std::make_unique<AnimationInterface> ("marl-multi-animation.xml");
+      animator->SetConstantPosition (senders.Get (0), 0.0, 10.0);
+      animator->SetConstantPosition (senders.Get (1), 0.0, 30.0);
+      animator->SetConstantPosition (routers.Get (0), 30.0, 20.0);
+      animator->SetConstantPosition (routers.Get (1), 60.0, 20.0);
+      animator->SetConstantPosition (receivers.Get (0), 90.0, 10.0);
+      animator->SetConstantPosition (receivers.Get (1), 90.0, 30.0);
+    }
 
   Simulator::Stop (Seconds (duration));
   Simulator::Run ();
 
-  flowmonHelper.SerializeToXmlFile ("marl-multi-flowmon.xml", false, true);
+  if (flowMon)
+    {
+      flowmonHelper.SerializeToXmlFile ("marl-multi-flowmon.xml", false, true);
+    }
+  animator.reset ();
   openGymInterface->NotifySimulationEnd ();
   Simulator::Destroy ();
   return 0;

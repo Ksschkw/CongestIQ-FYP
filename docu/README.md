@@ -24,11 +24,28 @@ FYP/
 | ID | Milestone                       | Status      | Completion Date |
 | -- | ------------------------------- | ----------- | --------------- |
 | M1 | Network Sandbox                 | Finished    | 26th May 2026   |
-| M2 | Congestion Dynamics             | Finished    | 20 June 2026   |
-| M3 | Single-Agent RL Environment     | Started     | —              |
-| M4 | MARL Training and Convergence   | Not started | —              |
-| M5 | Full Evaluation                 | Not started | —              |
-| M6 | Final Documentation and Defense | Not started | —              |
+| M2 | Congestion Dynamics             | Finished    | 20 June 2026    |
+| M3 | Single-Agent RL Environment     | Finished    | 9 August 2026   |
+| M4 | MARL Training and Convergence   | Finished    | 15 August 2026  |
+| M5 | Full Evaluation                 | Finished    | 3 September 2026 |
+| M6 | Final Documentation and Defense | In progress | n/a             |
+
+## Correctness Repair (October 2026)
+
+During defence preparation I rechecked the multi-agent evaluation and found that
+the reported MARL numbers were produced by the ns-3 default TCP CUBIC, not by the
+trained policy. The evaluation was invalid.
+
+The cause and the repair are documented in:
+
+- `m4-marl-training/notes/m4_root_cause_correction.md`
+- `m4-marl-training/notes/m4_control_verification.md`
+- `m4-marl-training/notes/m4_retrain_v2.md`
+- `m5-evaluation/notes/m5_corrected_evaluation.md`
+
+The corrected code is mirrored into `m4-marl-training/code/m4.3-marl-two-agents/`
+and `m5-evaluation/code/`. Live files are copied into those folders with
+`docu/sync_code.sh`.
 
 ## Environment
 
@@ -45,7 +62,7 @@ FYP/
 3. **CTDE paradigm:** Centralized Training, Decentralized Execution for MARL
 4. **Synchronized decision epochs:** Agents act once per RTT, not per ACK
 5. **Discrete percentage actions:** maintain, ±10%, ±20% cwnd adjustments
-6. **Multi-objective reward:** throughput − delay − loss + fairness
+6. **Multi-objective reward:** throughput, minus delay, minus loss, plus fairness
 
 ## Videos
 

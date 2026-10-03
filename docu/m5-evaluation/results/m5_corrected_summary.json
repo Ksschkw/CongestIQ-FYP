@@ -1,0 +1,101 @@
+[
+  {
+    "scenario": "Reno",
+    "n_flows": 2,
+    "total_throughput_kbps": 9937.232435858083,
+    "utilisation_pct": 99.37232435858083,
+    "mean_delay_ms": 54.30356370536324,
+    "loss_pct": 0.015761186819260413,
+    "jain_fairness": 0.9999999994829923,
+    "per_flow_throughput_kbps": [
+      4968.7,
+      4968.5
+    ]
+  },
+  {
+    "scenario": "CUBIC",
+    "n_flows": 2,
+    "total_throughput_kbps": 9936.916818667658,
+    "utilisation_pct": 99.36916818667657,
+    "mean_delay_ms": 60.87797083397301,
+    "loss_pct": 0.04658406711351573,
+    "jain_fairness": 0.999164985537177,
+    "per_flow_throughput_kbps": [
+      5112.1,
+      4824.8
+    ]
+  },
+  {
+    "scenario": "BBR",
+    "n_flows": 2,
+    "total_throughput_kbps": 9603.616370920376,
+    "utilisation_pct": 96.03616370920376,
+    "mean_delay_ms": 66.55033183699251,
+    "loss_pct": 0.3939642649925961,
+    "jain_fairness": 0.9949848005419296,
+    "per_flow_throughput_kbps": [
+      5142.7,
+      4460.9
+    ]
+  },
+  {
+    "scenario": "MARL (seed 1)",
+    "n_flows": 2,
+    "total_throughput_kbps": 8696.314924537863,
+    "utilisation_pct": 86.96314924537862,
+    "mean_delay_ms": 22.803539567826697,
+    "loss_pct": 0.0,
+    "jain_fairness": 0.999999947306069,
+    "per_flow_throughput_kbps": [
+      4349.2,
+      4347.2
+    ],
+    "episode_reward": 33582.5
+  },
+  {
+    "scenario": "MARL (seed 2)",
+    "n_flows": 2,
+    "total_throughput_kbps": 8696.314924537863,
+    "utilisation_pct": 86.96314924537862,
+    "mean_delay_ms": 22.803539567826697,
+    "loss_pct": 0.0,
+    "jain_fairness": 0.999999947306069,
+    "per_flow_throughput_kbps": [
+      4349.2,
+      4347.2
+    ],
+    "episode_reward": 33582.5
+  },
+  {
+    "scenario": "MARL (seed 3)",
+    "n_flows": 2,
+    "total_throughput_kbps": 8696.314924537863,
+    "utilisation_pct": 86.96314924537862,
+    "mean_delay_ms": 22.803539567826697,
+    "loss_pct": 0.0,
+    "jain_fairness": 0.999999947306069,
+    "per_flow_throughput_kbps": [
+      4349.2,
+      4347.2
+    ],
+    "episode_reward": 33582.5
+  },
+  {
+    "scenario": "MARL (mean of 3 seeds)",
+    "n_flows": 2,
+    "total_throughput_kbps": 8696.314924537863,
+    "total_throughput_kbps_std": 0.0,
+    "mean_delay_ms": 22.803539567826693,
+    "mean_delay_ms_std": 3.552713678800501e-15,
+    "loss_pct": 0.0,
+    "loss_pct_std": 0.0,
+    "jain_fairness": 0.999999947306069,
+    "jain_fairness_std": 0.0,
+    "utilisation_pct": 86.9631492453786,
+    "utilisation_pct_std": 1.4210854715202004e-14,
+    "per_flow_throughput_kbps": [
+      4349.2,
+      4347.2
+    ]
+  }
+]

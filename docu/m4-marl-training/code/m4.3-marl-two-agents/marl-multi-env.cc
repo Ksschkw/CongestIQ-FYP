@@ -120,11 +120,21 @@ MyMultiGymEnv::GetObservationSpace ()
 Ptr<OpenGymSpace>
 MyMultiGymEnv::GetActionSpace ()
 {
-  // Box action space, shape [nAgents], each value 0..4
-  std::vector<float> low (m_nAgents, 0.0f);
-  std::vector<float> high (m_nAgents, 4.0f);
-  std::vector<uint32_t> shape = {m_nAgents};
-  return CreateObject<OpenGymBoxSpace> (low, high, shape, TypeNameGet<uint32_t> ());
+  // Joint discrete action space. Each agent has five window actions, so the
+  // joint space has 5^nAgents values. Agent 0 is the least significant digit.
+  //
+  // The earlier version exposed a continuous box action space of one value per
+  // agent, which was rounded to five levels in Python. With a continuous space
+  // the Stable Baselines3 policy kept its output mean near the lower bound and
+  // relied on exploration noise, so the deterministic policy did not choose the
+  // window increases that the reward favoured. A discrete space makes the
+  // deterministic action a real choice (the most likely action).
+  uint32_t jointActions = 1;
+  for (uint32_t i = 0; i < m_nAgents; ++i)
+    {
+      jointActions *= 5;
+    }
+  return CreateObject<OpenGymDiscreteSpace> (jointActions);
 }
 
 Ptr<OpenGymDataContainer>
@@ -149,7 +159,9 @@ MyMultiGymEnv::GetReward ()
 {
   float totalThroughputMbps = 0.0f;
   for (uint32_t i = 0; i < m_nAgents; ++i)
-    totalThroughputMbps += m_throughputBps[i] / 1000000.0f;
+    {
+      totalThroughputMbps += m_throughputBps[i] / 1000000.0f;
+    }
 
   float sum = 0.0f;
   float sumSq = 0.0f;
@@ -163,39 +175,101 @@ MyMultiGymEnv::GetReward ()
                    ? (sum * sum) / (m_nAgents * sumSq)
                    : 0.0f;
 
-  float avgDelayPenalty = 0.0f;
+  // Average queueing delay above the lowest smoothed RTT seen so far.
+  // A smoothed RTT of zero means no sample exists yet, so it must not be
+  // allowed to set the minimum, otherwise the base propagation delay would be
+  // charged as queueing delay for the rest of the run.
+  float avgQueueDelayMs = 0.0f;
   for (uint32_t i = 0; i < m_nAgents; ++i)
     {
       float rtt = m_sRttMs[i];
-      if (m_minRtt[i] > rtt) m_minRtt[i] = rtt;
-      float queueDelay = (rtt - m_minRtt[i]) / 10.0f;
-      avgDelayPenalty += queueDelay;
+      if (rtt > 0.0f && m_minRtt[i] > rtt)
+        {
+          m_minRtt[i] = rtt;
+        }
+      float queueDelay = 0.0f;
+      if (m_minRtt[i] < 1.0e8f)
+        {
+          queueDelay = rtt - m_minRtt[i];
+          if (queueDelay < 0.0f)
+            {
+              queueDelay = 0.0f;
+            }
+        }
+      avgQueueDelayMs += queueDelay;
     }
-  avgDelayPenalty /= m_nAgents;
+  avgQueueDelayMs /= m_nAgents;
 
-  float lossPenalty = 0.0f;
+  float avgLoss = 0.0f;
   for (uint32_t i = 0; i < m_nAgents; ++i)
-    lossPenalty += m_lossRates[i];
+    {
+      avgLoss += m_lossRates[i];
+    }
+  avgLoss /= m_nAgents;
 
-  return (20.0f * totalThroughputMbps / 10.0f)
-         + (20.0f * fairness)
-         - avgDelayPenalty
-         - lossPenalty;
+  // Average congestion window in bytes.
+  float avgCwndBytes = 0.0f;
+  for (uint32_t i = 0; i < m_nAgents; ++i)
+    {
+      avgCwndBytes += m_cwnd[i];
+    }
+  avgCwndBytes /= m_nAgents;
+
+  // Reward balance, revised after several corrected training runs.
+  //
+  // The version documented in the report gave throughput up to 20 points and
+  // charged 1 point per millisecond of queueing delay. A constant-action
+  // experiment showed that this made "hold cwnd" the best behaviour.
+  //
+  // Later versions gave throughput 60 points, but a light delay charge made a
+  // policy that raised the window at every step the best one it could find.
+  // That policy filled the router queue and produced a mean delay near 142 ms.
+  //
+  // The weights below add a direct congestion window charge, because the delay
+  // charge alone was not enough to pull the policy away from the flooding
+  // behaviour. A hand-coded reference controller that raises the window to about
+  // 25 KB and then holds it earns about 73 points per step, so the good
+  // operating point is reachable. With a window charge of 0.0005 points per
+  // byte, a window of 25 KB costs about 12 points per step, a held 5 KB window
+  // costs about 3, and a flooded 500 KB window costs 250. Throughput remains
+  // worth up to 60 points and fairness up to 20, the queueing delay charge is
+  // 0.3 points per millisecond, and loss costs 20 points per unit loss rate.
+  float throughputScore = totalThroughputMbps / 10.0f;
+  if (throughputScore > 1.0f)
+    {
+      throughputScore = 1.0f;
+    }
+
+  return 60.0f * throughputScore
+         + 20.0f * fairness
+         - 0.3f * avgQueueDelayMs
+         - 20.0f * avgLoss
+         - 0.0005f * avgCwndBytes;
 }
 
 bool
 MyMultiGymEnv::ExecuteActions (Ptr<OpenGymDataContainer> action)
 {
-  auto box = DynamicCast<OpenGymBoxContainer<uint32_t>> (action);
-  if (!box)
+  Ptr<OpenGymDiscreteContainer> discrete = DynamicCast<OpenGymDiscreteContainer> (action);
+  if (!discrete)
     return false;
+
+  // Decode the joint action. Agent 0 is the least significant digit.
+  uint32_t joint = discrete->GetValue ();
 
   for (uint32_t i = 0; i < m_nAgents; ++i)
     {
       if (!m_sockets[i])
-        continue;
+        {
+          joint /= 5;
+          continue;
+        }
 
-      uint32_t act = box->GetValue (i);
+      uint32_t act = joint % 5;
+      joint /= 5;
+
+      // Action ordering follows the project report: 0 keeps the window and the
+      // other values raise or lower it.
       double mult = 1.0;
       switch (act) {
         case 0: mult = 1.0; break;

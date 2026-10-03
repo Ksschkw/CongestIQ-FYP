@@ -48,3 +48,7 @@ Thumbs.db
 !ns-3-dev/scratch
 
 *DE.md
+
+# Agent scratch and working plan
+.agent-tmp/
+tasks.md

@@ -4405,6 +4405,12 @@ TcpSocketBase::GetTcpState (void) const
   return m_tcb;
 }
 
+Ptr<TcpCongestionOps>
+TcpSocketBase::GetCongestionControlAlgorithm (void) const
+{
+    return m_congestionControl;
+}
+
 void
 TcpSocketBase::SetPersistTimeout(Time timeout)
 {

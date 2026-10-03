@@ -18,8 +18,8 @@
  * Author: Piotr Gawlowicz <gawlowicz@tkn.tu-berlin.de>
  */
 
-#include "marl-rl.h"
-#include "marl-rl-env.h"
+#include "tcp-rl.h"
+#include "tcp-rl-env.h"
 #include "ns3/tcp-header.h"
 #include "ns3/object.h"
 #include "ns3/node-list.h"
