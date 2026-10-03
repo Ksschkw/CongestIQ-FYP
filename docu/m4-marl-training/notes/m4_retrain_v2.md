@@ -89,7 +89,10 @@ cloning.
   produced a near-zero gradient here. A direct forward pass through the policy
   network fixed it. The clone reached 99.9 percent agreement with the reference,
   including 100 percent agreement on the window-increase transitions.
-- Refinement: PPO continued from the cloned policy at a low learning rate.
+- Refinement: PPO continued from the cloned policy at a low learning rate. Over
+  3,000 steps the mean episode reward moved from 33,582 to 34,276, and the
+  network metrics were unchanged, so the refinement preserved the learned
+  behaviour. The delivered model is the refined model.
 
 The demonstration data is saved as `bc_demonstrations.npz`. The cloning is
 implemented in `rl_agent/bc_warmstart.py`.
@@ -107,7 +110,7 @@ implemented in `rl_agent/bc_warmstart.py`.
 | Episode | 60 simulated seconds, 599 learning steps |
 | PPO hyperparameters | n_steps 2048, batch 64, 10 epochs, gamma 0.99 |
 | Behaviour cloning | 3,000 steps, learning rate 1e-2 |
-| PPO refinement | 8,000 steps, learning rate 5e-5, entropy coefficient 0.002 |
+| PPO refinement | 3,000 steps, learning rate 5e-5, entropy coefficient 0.002 |
 
 ## Model files in the example directory
 

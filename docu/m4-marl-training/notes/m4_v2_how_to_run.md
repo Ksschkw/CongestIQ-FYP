@@ -33,25 +33,47 @@ Outputs go to `docu/m5-evaluation/results/control_verification/`.
 
 ## 3. Train the shared policy
 
+There are two training routes. The delivered policy comes from route B.
+
+### Route A: PPO from random weights
+
 ```bash
 cd /home/ksschkw/Projects/fyp
 MARL_TIMESTEPS=100000 venv/bin/python -u rl_agent/train_marl_multi_v2.py
 ```
 
-What the script does:
+This trains PPO from random weights. On this reward and topology it converges
+to a policy that raises the window at every step and floods the queue, so this
+route is kept for the record rather than for the delivered model.
 
-1. Changes into `ns-3-dev/contrib/ns3-gym/examples/marl-multi-tcp`, because
-   ns3-gym takes the program name from the working directory name.
-2. Creates the wrapped environment with `simArgs={"--flowmon": 0}`. FlowMonitor
-   is disabled because it is expensive and only needed for evaluation.
-3. Trains PPO with the same hyperparameters as the original run.
-4. Saves a checkpoint every 10,000 steps as
-   `ppo_marl_multi_v2_ckpt_<steps>_steps.zip`.
-5. Writes every finished episode reward to
-   `docu/m4-marl-training/results/marl_v2_training_rewards.csv`.
-6. Saves the final model as `ppo_marl_multi_v2.zip`.
+### Route B: imitation warm start, then PPO refinement
 
-The old invalid model, `ppo_marl_multi.zip`, is left untouched for the record.
+```bash
+cd /home/ksschkw/Projects/fyp
+MARL_BC_STEPS=3000 MARL_FINETUNE_STEPS=20000 venv/bin/python -u rl_agent/bc_warmstart.py
+```
+
+This runs three stages:
+
+1. It collects demonstrations from the reference controller. The reference
+   controller raises the window by 20 percent while it is below 25 KB and holds
+   it otherwise. Random actions are used for part of each episode so that many
+   window sizes are visited, and every visited state is labelled with the
+   reference action. The data is saved as `bc_demonstrations.npz`.
+2. It trains the policy network to imitate those labels. That is behaviour
+   cloning, which is supervised learning.
+3. It refines the cloned policy with PPO at a low learning rate.
+
+The helper `rl_agent/finetune_marl.py` can refine any saved model:
+
+```bash
+MARL_START_MODEL=.../ppo_marl_multi_v4_bc.zip MARL_OUT_MODEL=ppo_marl_multi_v4 \
+MARL_FINETUNE_STEPS=3000 venv/bin/python -u rl_agent/finetune_marl.py
+```
+
+The final model is copied to `ppo_marl_multi_v2.zip`, which is the name the
+evaluation script uses. The cloning and refinement are described in
+`m4_retrain_v2.md`.
 
 ## 4. Evaluate
 
@@ -125,7 +147,10 @@ bash docu/sync_code.sh
 | `ns-3-dev/contrib/ns3-gym/examples/marl-multi-tcp/marl-multi-env.{h,cc}` | `docu/m4-marl-training/code/m4.3-marl-two-agents/` |
 | `rl_agent/marl_multi_env.py` | `docu/m4-marl-training/code/m4.3-marl-two-agents/` |
 | `rl_agent/train_marl_multi_v2.py` | `docu/m4-marl-training/code/m4.3-marl-two-agents/` |
+| `rl_agent/bc_warmstart.py` | `docu/m4-marl-training/code/m4.3-marl-two-agents/` |
+| `rl_agent/finetune_marl.py` | `docu/m4-marl-training/code/m4.3-marl-two-agents/` |
 | `rl_agent/verify_control.py` | `docu/m4-marl-training/code/m4.3-marl-two-agents/` |
+| `rl_agent/make_animation.py` | `docu/m4-marl-training/code/m4.3-marl-two-agents/` |
 | `rl_agent/m5_evaluate.py` | `docu/m5-evaluation/code/` |
 | `ns-3-dev/src/internet/model/tcp-socket-base.{h,cc}` | `docu/m4-marl-training/code/m4.3-marl-two-agents/ns3-patches/` |
 | `ns-3-dev/scratch/two-flow-baseline.cc` | `docu/m5-evaluation/code/` |
