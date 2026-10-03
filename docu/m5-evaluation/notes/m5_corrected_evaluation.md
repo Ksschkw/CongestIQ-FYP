@@ -136,3 +136,27 @@ venv/bin/python rl_agent/m5_evaluate.py --marl --seeds 1 2 3 --duration 60
 venv/bin/python rl_agent/m5_evaluate.py --plot-only --marl
 venv/bin/python rl_agent/verify_control.py --duration 15
 ```
+
+## Figures
+
+The figures that go into the report and the slides are generated from the result
+files by `docu/make_report_figures.py`. They live in
+`docu/m5-evaluation/results/figures/`.
+
+| File | Used as | Content |
+| --- | --- | --- |
+| `fig_architecture.png` | Figure 3.1 | The two-process testbed. The Python policy process and the ns-3 simulation process exchange the state, the action and the reward through ZeroMQ and Protocol Buffers. |
+| `fig_reward_landscape.png` | Figure 4.6 | Mean reward per step for each constant window action, before and after the reward was calibrated. |
+| `fig_comparison.png` | Figure 4.7 | Four-panel comparison of the learned policy against Reno, CUBIC and BBR. |
+| `fig_cwnd_trace.png` | Figure 4.8 | Congestion window of both agents over a 60-second run, against the fair share of the bandwidth delay product. |
+| `fig_tradeoff.png` | Figure 4.9 | Throughput and delay trade-off scatter. |
+| `fig_slide_metrics.png` | Slide 8 | The same comparison in a wide, short layout for the slide. |
+
+The figures replace the two terminal screenshots that showed the invalid run.
+`docu/insert_report_figures.py` rebuilds the corrected report and puts the
+figures in place, and `docu/insert_slide_figures.py` does the same for the
+slides. Both scripts regenerate their output from the original files first, so
+they can be run again without duplicating anything. The report structure is
+preserved: no paragraph is added or removed by the text corrections, and the
+figure insertion only replaces image bytes and adds two new figures with their
+captions.
