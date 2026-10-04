@@ -243,7 +243,7 @@ The `docu/` folder is the project’s memory. Every milestone is self‑containe
 
 - **Code:** [`dumbbell-tcp.cc`](docu/m1-network-sandbox/code/dumbbell-tcp.cc), [`plot_flowmon.py`](docu/m1-network-sandbox/code/plot_flowmon.py)  
 - **Results:** [`throughput.png`](docu/m1-network-sandbox/results/throughput.png), [`delay.png`](docu/m1-network-sandbox/results/delay.png), [`loss.png`](docu/m1-network-sandbox/results/loss.png)  
-- **Notes:** [`observations.md`](docu/m1-network-sandbox/notes/observations.md), [`video-script.md`](docu/m1-network-sandbox/notes/video-script.md)  
+- **Notes:** [`observations.md`](docu/m1-network-sandbox/notes/observations.md)  
 - **Video:** [M1 Walkthrough](https://youtu.be/mEq3XPbP3ms)
 
 ### M2 – Congestion Dynamics
@@ -261,7 +261,7 @@ The `docu/` folder is the project’s memory. Every milestone is self‑containe
 - **Evaluation scripts:** [`eval_safe.py`](docu/m3-single-agent-rl/code/eval_safe.py), [`eval_v2.py`](docu/m3-single-agent-rl/code/eval_v2.py), [`eval_v3.py`](docu/m3-single-agent-rl/code/eval_v3.py)  
 - **Trained models:** [`ppo_rl_tcp_model.zip` (v1)](docu/m3-single-agent-rl/code/ppo_rl_tcp_model.zip), [`ppo_rl_tcp_model_v2.zip` (v2)](docu/m3-single-agent-rl/code/ppo_rl_tcp_model_v2.zip), [`ppo_rl_tcp_model_v3.zip` (v3)](docu/m3-single-agent-rl/code/ppo_rl_tcp_model_v3.zip)  
 - **Results:** [`training_rewards_all.png`](docu/m3-single-agent-rl/results/training_rewards_all.png), [`throughput_comparison_all.png`](docu/m3-single-agent-rl/results/throughput_comparison_all.png), [`delay_comparison_all.png`](docu/m3-single-agent-rl/results/delay_comparison_all.png), [`loss_comparison_all.png`](docu/m3-single-agent-rl/results/loss_comparison_all.png)  
-- **Notes:** [`m3_as_built.md`](docu/m3-single-agent-rl/notes/m3_as_built.md), [`m3_experiments.md`](docu/m3-single-agent-rl/notes/m3_experiments.md), [`observations.md`](docu/m3-single-agent-rl/notes/observations.md), [`video-script.md`](docu/m3-single-agent-rl/notes/video-script.md)  
+- **Notes:** [`m3_as_built.md`](docu/m3-single-agent-rl/notes/m3_as_built.md), [`m3_experiments.md`](docu/m3-single-agent-rl/notes/m3_experiments.md), [`m3_observations.md`](docu/m3-single-agent-rl/notes/m3_observations.md), [`setup-notes.md`](docu/m3-single-agent-rl/notes/setup-notes.md)  
 - **Video:** [M3 Walkthrough](https://youtu.be/)
 
 ### M4 – MARL Training
