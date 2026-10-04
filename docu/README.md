@@ -27,7 +27,7 @@ FYP/
 | M3 | Single-Agent RL Environment     | Finished    | 9 August 2026   |
 | M4 | MARL Training and Convergence   | Finished    | 15 August 2026  |
 | M5 | Full Evaluation                 | Finished    | 3 September 2026 |
-| M6 | Final Documentation and Defense | Finished    | 4 October 2026  |
+| M6 | Final Documentation and Defence | Finished    | 4 October 2026  |
 
 ## Correctness Repair (October 2026)
 
@@ -67,7 +67,7 @@ results.
 
 All milestone walkthroughs are uploaded to YouTube:
 
-- [Playlist link to be added]
+- [CongestiQ playlist](https://youtube.com/playlist?list=PLhU0J79Smu6kmr6QNJgd0cFa2f-UCwU1K)
 
 ## References
 

@@ -4,7 +4,7 @@
 # CongestiQ – MARL for Adaptive TCP Congestion Control
 
 > **Final‑year project by Kosisochukwu Okafor (FUTO, Software Engineering)**  
-> Investigating whether Multi‑Agent Reinforcement Learning can learn better congestion control than Reno, CUBIC, and BBR — all inside a simulator.
+> Investigating whether Multi‑Agent Reinforcement Learning can learn better congestion control than Reno, CUBIC, and BBR, all inside a simulator.
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/Ksschkw/CongestiQ-FYP)](https://github.com/Ksschkw/CongestiQ-FYP)
 [![YouTube Playlist](https://img.shields.io/badge/YouTube-Playlist-red)](https://youtube.com/playlist?list=PLhU0J79Smu6kmr6QNJgd0cFa2f-UCwU1K)
@@ -41,9 +41,9 @@
 |----------|-----------|
 | **Offline training, frozen policy** | RL is too slow for per‑ACK decisions; we train in simulation, then evaluate. |
 | **Multi‑Agent RL (MARL) with CTDE** | Multiple flows learn to share the bottleneck fairly (Centralised Training, Decentralised Execution). |
-| **Periodic actions (once per RTT)** | Balances learning speed with realistic deployment constraints. |
-| **Discrete action space** | Maintain, ±10%, ±20% of current cwnd – simple and explainable. |
-| **Dynamic reward with decaying maximums** | Avoids over‑fitting to a single bottleneck capacity or buffer size. |
+| **Periodic actions (every 100 ms)** | The policy acts at a fixed decision step, coarse enough to learn and simple to reason about. |
+| **Discrete action space** | Five window choices per agent (keep, plus or minus 10 and 20 percent), sent as one joint value. |
+| **Cooperative reward with a window charge** | Throughput and fairness are rewarded; queueing delay, loss and window growth are charged, which stops both flows from filling the queue. |
 | **ns3‑gym bridge** | Python RL agents talk to ns‑3 via ZMQ and Protobuf. |
 
 ---
@@ -58,7 +58,7 @@ CongestiQ-FYP/
 │   ├── m3-single-agent-rl/        ← M3: RL environment and training
 │   ├── m4-marl-training/          ← M4: MARL environment, training, evaluation
 │   ├── m5-evaluation/             ← M5: Full benchmarks
-│   └── m6-final-documentation/    ← (future) Thesis chapters
+│   └── m6-final-documentation/    ← M6: report figures and defence material
 ├── ns-3-dev/                      ← ns‑3 simulator (gitignored)
 ├── netanim/                       ← NetAnim visualiser (gitignored)
 ├── rl_agent/                      ← Python RL code (reward wrappers, training/eval scripts)
@@ -70,8 +70,7 @@ Everything you need to understand, reproduce, or evaluate my work lives inside `
 
 - `code/` – all source files (C++ simulation scripts, Python agents, modified ns‑3 modules)  
 - `results/` – graphs (PNG), FlowMonitor XML, NetAnim screenshots  
-- `notes/` – detailed observations, as‑built narratives, experiment logs, video scripts  
-- `videos/` – links to YouTube walkthroughs
+- `notes/` - detailed observations, as-built narratives and experiment logs
 
 ---
 
@@ -79,14 +78,14 @@ Everything you need to understand, reproduce, or evaluate my work lives inside `
 
 | ID | Milestone | Status |
 |----|-----------|--------|
-| M1 | Network Sandbox | ✅ |
-| M2 | Congestion Dynamics | ✅ |
-| M3 | Single‑Agent RL | ✅ |
-| M4 | MARL Training | ✅ (with limitations) |
-| M5 | Full Evaluation | ✅ |
-| M6 | Documentation & Defense | 🔲 |
+| M1 | Network Sandbox | Complete |
+| M2 | Congestion Dynamics | Complete |
+| M3 | Single-Agent RL | Complete |
+| M4 | MARL Training | Complete |
+| M5 | Full Evaluation | Complete |
+| M6 | Documentation and Defence | Complete |
 
-Each milestone has a **dedicated walkthrough video** — see the [YouTube Playlist](https://youtube.com/playlist?list=PLhU0J79Smu6kmr6QNJgd0cFa2f-UCwU1K).
+Each milestone has a **dedicated walkthrough video**. See the [YouTube Playlist](https://youtube.com/playlist?list=PLhU0J79Smu6kmr6QNJgd0cFa2f-UCwU1K).
 
 ---
 
@@ -161,23 +160,31 @@ cd docu/m1-network-sandbox
 python3 code/plot_flowmon.py results/dumbbell-tcp-flowmon.xml
 ```
 
-### Train a single‑agent RL policy (M4)
+### Train the single-agent policy (M3 and M4)
 
 ```bash
 cd rl_agent
-python3 train_m4_single_v2.py
+python3 train_m3_v3.py
 ```
 
-### Evaluate a trained model
+### Evaluate a single-agent model
 
 ```bash
 python3 eval_m4_single_v2.py
 ```
 
-### Run multi‑agent MARL training (M4)
+### Train and evaluate the two-agent policy (M4 and M5)
 
 ```bash
-python3 train_marl_multi.py
+python3 bc_warmstart.py
+python3 finetune_marl.py
+python3 m5_evaluate.py --marl --seeds 1 2 3 --duration 60
+```
+
+### Verify that the policy owns the congestion window
+
+```bash
+python3 verify_control.py --duration 15
 ```
 
 ### Run full evaluation baselines (M5)
@@ -202,7 +209,7 @@ cd ns-3-dev
 
 - BBR gets bullied by aggressive CUBIC flows → 82 ms delay, 2.5% loss.
 - The bottleneck queue shows a perfect **TCP sawtooth**, confirming classic AIMD behaviour.
-- Jain’s Fairness Index = 0.98 — “fair” but at the cost of high latency.  
+- Jain’s Fairness Index = 0.98, fair but at the cost of high latency.  
 - Full observations: [M2 observations](docu/m2-congestion-dynamics/notes/observations.md)
 
 ### M3 – Single‑Agent RL
@@ -269,7 +276,7 @@ The `docu/` folder is the project’s memory. Every milestone is self‑containe
 - **C++ multi‑agent environment:** [`marl-multi-sim.cc`](docu/m4-marl-training/code/m4.3-marl-two-agents/marl-multi-sim.cc), [`marl-multi-env.h`](docu/m4-marl-training/code/m4.3-marl-two-agents/marl-multi-env.h), [`marl-multi-env.cc`](docu/m4-marl-training/code/m4.3-marl-two-agents/marl-multi-env.cc)  
 - **Python wrapper:** [`marl_multi_env.py`](docu/m4-marl-training/code/m4.3-marl-two-agents/marl_multi_env.py)  
 - **Training/eval:** [`train_marl_multi.py`](docu/m4-marl-training/code/m4.3-marl-two-agents/train_marl_multi.py), [`eval_marl_multi.py`](docu/m4-marl-training/code/m4.3-marl-two-agents/eval_marl_multi.py)  
-- **Model:** [`ppo_marl_multi.zip`](docu/m4-marl-training/code/m4.3-marl-two-agents/ppo_marl_multi.zip)  
+- **Model:** [`ppo_marl_multi_v2.zip`](docu/m4-marl-training/code/m4.3-marl-two-agents/ppo_marl_multi_v2.zip)  
 - **Notes:** [`m4_as_built.md`](docu/m4-marl-training/notes/m4_as_built.md), [`m4_experiments.md`](docu/m4-marl-training/notes/m4_experiments.md), [`m4_observations.md`](docu/m4-marl-training/notes/m4_observations.md)
 
 ### M5 – Full Evaluation
@@ -279,6 +286,13 @@ The `docu/` folder is the project’s memory. Every milestone is self‑containe
 - **Results:** [`m5_throughput_comparison.png`](docu/m5-evaluation/results/m5_throughput_comparison.png), [`m5_fairness_comparison.png`](docu/m5-evaluation/results/m5_fairness_comparison.png), [`m5_delay_comparison.png`](docu/m5-evaluation/results/m5_delay_comparison.png), [`m5_loss_comparison.png`](docu/m5-evaluation/results/m5_loss_comparison.png)  
 - **FlowMonitor files:** [`two-flow-TcpNewReno.flowmon`](docu/m5-evaluation/results/two-flow-TcpNewReno.flowmon), [`two-flow-TcpCubic.flowmon`](docu/m5-evaluation/results/two-flow-TcpCubic.flowmon), [`two-flow-TcpBbr.flowmon`](docu/m5-evaluation/results/two-flow-TcpBbr.flowmon)  
 - **Notes:** [`m5_as_built.md`](docu/m5-evaluation/notes/m5_as_built.md), [`m5_observations.md`](docu/m5-evaluation/notes/m5_observations.md)
+
+### M6 - Final Documentation
+
+- **Report:** [`MyFInalReport_corrected.docx`](reportssofar/MyFInalReport_corrected.docx)
+- **Presentation:** [`Okafor_Kosisochukwu_Johnpaul_FYP_Presentation_corrected.pptx`](reportssofar/Okafor_Kosisochukwu_Johnpaul_FYP_Presentation_corrected.pptx)
+- **Report figures:** [`figures/`](docu/m5-evaluation/results/figures/)
+- **NetAnim guide:** [`netanim-guide.md`](docu/m6-final-documentation/notes/netanim-guide.md)
 
 ---
 
