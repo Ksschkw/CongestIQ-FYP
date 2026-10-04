@@ -207,13 +207,13 @@ cd ns-3-dev
 
 ### M3 – Single‑Agent RL
 
-- **Observation bug discovered**: the C++ environment reports a bogus throughput (sum of `bytesInFlight` snapshots, not actual delivery).  
-- Because the agent never saw true throughput, all three reward functions failed to push cwnd beyond ~209 kbps.  
-- However, the agent learned a **zero‑loss, ultra‑low‑latency policy** (22.8 ms delay, 0% loss) — perfect for real‑time apps, useless for bulk transfer.  
-- Lesson: **validate the observation space before designing rewards.**  
+- **Two bugs were found.** The C++ environment reported a bogus throughput (the sum of `bytesInFlight` snapshots, not actual delivery), and the action code assigned the window to a fixed absolute value instead of multiplying it.
+- Because of those two bugs, all three reward functions failed to push cwnd beyond ~209 kbps. Both bugs are now fixed, and the single-agent result after the fix is 8565.3 kbps.
+- At the time, the agent learned a **zero-loss, ultra-low-latency policy** (22.8 ms delay, 0% loss) that was useless for bulk transfer.
+- Lesson: **validate the observation space and the action path before designing rewards.**
 - Full experiment log: [M3 experiment log](docu/m3-single-agent-rl/notes/m3_experiments.md)  
-- As‑built narrative: [M3 as‑built](docu/m3-single-agent-rl/notes/m3_as_built.md)  
-- Observations: [M3 observations](docu/m3-single-agent-rl/notes/observations.md)
+- As-built narrative: [M3 as-built](docu/m3-single-agent-rl/notes/m3_as_built.md)  
+- Observations: [M3 observations](docu/m3-single-agent-rl/notes/m3_observations.md)
 
 ### M4 - Single-Agent RL Fix and MARL
 
