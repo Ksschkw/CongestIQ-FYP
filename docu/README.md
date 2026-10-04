@@ -9,12 +9,11 @@ FYP/
 │   ├── m3-single-agent-rl/        # Milestone 3
 │   ├── m4-marl-training/          # Milestone 4
 │   ├── m5-evaluation/             # Milestone 5
-│   ├── m6-final-documentation/    # Milestone 6
-│   └── _global-notes/             # Cross-cutting notes
-├── ns-3-dev/                      # ns-3 simulator (gitignored)
-├── netanim/                       # NetAnim visualizer (gitignored)
-├── src/                           # Custom ns-3 modules (future)
-├── rl-agent/                      # Python RL code (future)
+│   └── m6-final-documentation/    # Milestone 6
+├── rl_agent/                      # Python RL training and evaluation code
+├── reportssofar/                  # Report and presentation documents
+├── ns-3-dev/                      # ns-3 simulator with the gym environment
+├── netanim/                       # NetAnim visualizer
 ├── .gitignore
 └── README.md                      # Project-level README
 ```
@@ -28,7 +27,7 @@ FYP/
 | M3 | Single-Agent RL Environment     | Finished    | 9 August 2026   |
 | M4 | MARL Training and Convergence   | Finished    | 15 August 2026  |
 | M5 | Full Evaluation                 | Finished    | 3 September 2026 |
-| M6 | Final Documentation and Defense | In progress | n/a             |
+| M6 | Final Documentation and Defense | Finished    | 4 October 2026  |
 
 ## Correctness Repair (October 2026)
 
@@ -44,15 +43,15 @@ The cause and the repair are documented in:
 - `m5-evaluation/notes/m5_corrected_evaluation.md`
 
 The corrected code is mirrored into `m4-marl-training/code/m4.3-marl-two-agents/`
-and `m5-evaluation/code/`. Live files are copied into those folders with
-`docu/sync_code.sh`.
+and `m5-evaluation/code/`, so the tracked copies match the code that produced the
+results.
 
 ## Environment
 
 - **OS:** Linux
 - **Simulator:** ns-3 (latest dev)
 - **Visualization:** NetAnim
-- **RL Framework:** Python + gymnasium + stable-baselines3 (planned)
+- **RL framework:** Python, Gymnasium and Stable-Baselines3, with PyTorch
 - **Graphing:** matplotlib, pandas
 
 ## Key Design Decisions
@@ -60,9 +59,9 @@ and `m5-evaluation/code/`. Live files are copied into those folders with
 1. **Simulation-based offline training:** RL agents train in ns-3, not on live networks
 2. **ns3-gym interface:** Python RL agent communicates with ns-3 via ns3-gym
 3. **CTDE paradigm:** Centralized Training, Decentralized Execution for MARL
-4. **Synchronized decision epochs:** Agents act once per RTT, not per ACK
-5. **Discrete percentage actions:** maintain, ±10%, ±20% cwnd adjustments
-6. **Multi-objective reward:** throughput, minus delay, minus loss, plus fairness
+4. **Synchronized decision epochs:** Agents act once per 100 millisecond decision step, not per acknowledgment
+5. **Discrete percentage actions:** keep, ±10% and ±20% window adjustments per agent, sent as one joint value
+6. **Multi-objective reward:** throughput and fairness, minus queueing delay, loss and window growth
 
 ## Videos
 

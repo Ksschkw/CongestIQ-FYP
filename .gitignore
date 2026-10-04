@@ -55,3 +55,12 @@ tasks.md
 # Office lock files
 ~$*.docx
 .~lock.*#
+
+# Personal notes and internal tooling (kept locally, not published)
+docu/_global-notes/
+docu/m6-final-documentation/notes/defense-guide.md
+docu/m6-final-documentation/notes/report-corrections.md
+docu/m6-final-documentation/notes/project-summary.md
+docu/m6-final-documentation/notes/plain-language-explanation.md
+docu/*.py
+docu/*.sh
