@@ -1,3 +1,11 @@
+> **Update (October 2026).** This note describes the M3 single-agent reward. The
+> reward used by the delivered multi-agent policy is different. It gives
+> throughput up to 60 points, Jain fairness up to 20 points, and it charges 0.3
+> points per millisecond of queueing delay, 20 points per unit loss rate, and
+> 0.0005 points per byte of congestion window. The final formula is in
+> `docu/m4-marl-training/code/m4.3-marl-two-agents/marl-multi-env.cc` and is
+> documented in `docu/m4-marl-training/notes/m4_retrain_v2.md`.
+
 ## The Reward Function (Single‑Agent, M3)
 
 $$R_t = \alpha \cdot \text{throughput\_reward} - \beta \cdot \text{delay\_penalty} - \gamma \cdot \text{loss\_penalty}$$

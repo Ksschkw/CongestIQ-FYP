@@ -1,3 +1,17 @@
+> **Update (October 2026).** This note is the record from before the correctness
+> repair, and two of its conclusions are no longer true.
+>
+> 1. The multi-agent numbers (5112.1 kbps, 4824.8 kbps, Jain 0.9992) are two TCP
+>    CUBIC flows, not the output of the learned policy.
+> 2. The cause was not a rejected class. The no-op congestion control was
+>    configured before the TCP layer four protocol object existed, so the
+>    configuration call matched nothing and every socket ran the default
+>    algorithm. The configuration function does not report a miss.
+>
+> The corrected explanation is in `m4_root_cause_correction.md`, the evidence is
+> in `m4_control_verification.md`, the retrain is in `m4_retrain_v2.md`, and the
+> corrected results are in `../m5-evaluation/notes/m5_corrected_evaluation.md`.
+
 # M4 As‑Built – Multi‑Agent RL for TCP Congestion Control
 
 **Author:** Okafor Kosisochukwu Johnpaul  
@@ -163,7 +177,7 @@ The positive reward means the agent was already doing well early, but it didn’
 
 ---
 
-## Part 7: MARL Evaluation Results
+## Part 7: MARL Evaluation Results (invalid, see the update at the top)
 
 After training, I evaluated the shared policy on one episode (60 seconds) and parsed FlowMonitor data.
 
@@ -208,7 +222,7 @@ This is a fantastic result. The agents:
 
 ---
 
-## Critical Limitation: MARL Result Validity
+## Critical Limitation: MARL Result Validity (invalid, see the update at the top)
 
 During M5 baseline comparisons, I discovered that the MARL evaluation produced numbers **identical to CUBIC**:
 

@@ -1,3 +1,9 @@
+> **Update (October 2026).** Two values in this note are no longer the current
+> ones. The Jain index of 0.9992 belongs to TCP CUBIC, not to the learned policy,
+> and the multi-agent figures come from the broken run. The learned policy was
+> later evaluated correctly and achieved 8696.3 kbps, 22.80 ms, 0.000 percent
+> loss and a Jain index of 1.0000. See `m5_corrected_evaluation.md`.
+
 # M5 Observations
 
 ## Baseline Differences
@@ -9,7 +15,7 @@
 ## RL Performance
 
 - Single‑agent RL achieves 8565 kbps but with high delay (85.67 ms) and loss (0.34%).
-- MARL two‑agent result is unreliable because it mimics CUBIC.
+- The MARL two-agent result was unreliable until October 2026 because it mimicked CUBIC. After the correctness repair the learned policy achieved 8696.3 kbps, 22.80 ms, 0.000 percent loss and a Jain index of 1.0000.
 
 ## Key Insight
 

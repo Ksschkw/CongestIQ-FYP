@@ -1,3 +1,9 @@
+> **Update (October 2026).** Two values in this note are no longer the current
+> ones. The Jain index of 0.9992 belongs to TCP CUBIC, not to the learned policy,
+> and the multi-agent figures come from the broken run. The learned policy was
+> later evaluated correctly and achieved 8696.3 kbps, 22.80 ms, 0.000 percent
+> loss and a Jain index of 1.0000. See `m5_corrected_evaluation.md`.
+
 # M5 As‑Built – Full Evaluation
 
 **Author:** Okafor Kosisochukwu Johnpaul  
@@ -33,12 +39,12 @@ Runs:
 | Variant | Flow 1 Throughput | Flow 2 Throughput | Avg Delay | Avg Loss | Jain Fairness |
 |---------|-------------------|-------------------|-----------|----------|---------------|
 | Reno    | 4968.7 kbps       | 4968.5 kbps       | 54.28 ms  | 0.016%   | 1.0000        |
-| CUBIC   | 5112.1 kbps       | 4824.8 kbps       | 60.91 ms  | 0.047%   | 0.9992        |
+| CUBIC   | 5112.1 kbps       | 4824.8 kbps       | 60.88 ms  | 0.047%   | 0.9992        |
 | BBR     | 5142.7 kbps       | 4460.9 kbps       | 66.55 ms  | 0.394%   | 0.9950        |
 
 ---
 
-## MARL Comparison (with caveat)
+## MARL Comparison (invalid, see the update at the top)
 
 The MARL evaluation produced identical numbers to CUBIC, indicating the RL policy did not truly control cwnd. This is documented as a limitation in M4.
 

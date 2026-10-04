@@ -1,3 +1,11 @@
+> **Update (October 2026).** This note records the third milestone as it stood
+> at the time. The 209 kbps result was caused by the broken throughput
+> observation described here, and also by a second bug found later: the action
+> code assigned the window to a fixed absolute value instead of multiplying the
+> current value. Both bugs are fixed in the current code. The single-agent result
+> after the fixes is 8565.3 kbps. The later correctness work is recorded in
+> `m4_root_cause_correction.md`.
+
 # M3 Observations: Single‑Agent RL Training and Evaluation
 
 **Date:** 09 August 2026
